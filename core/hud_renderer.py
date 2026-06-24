@@ -57,6 +57,7 @@ class HudRenderer:
         if show_fps:
             lines.append(f"FPS: {fps: .1f}")
         self._draw_panel(frame, lines)
+        self._draw_keycaps(frame, decision.pressed_keys)
         return frame
 
     def _draw_zone(self, frame, top: int, bottom: int, label: str, color, active: bool) -> None:
@@ -96,3 +97,34 @@ class HudRenderer:
         cv2.putText(frame, "FAIC TECHFEST", (x + 12, y + 25), cv2.FONT_HERSHEY_DUPLEX, 0.6, TECH_WHITE, 1, cv2.LINE_AA)
         for index, line in enumerate(lines):
             cv2.putText(frame, line, (x + 12, y + 55 + index * 24), cv2.FONT_HERSHEY_SIMPLEX, 0.55, TECH_CYAN, 1, cv2.LINE_AA)
+
+    def _draw_keycaps(self, frame, pressed_keys: set[str]) -> None:
+        height, width, _ = frame.shape
+        specs = [
+            ("W", "w", 42),
+            ("A", "a", 42),
+            ("S", "s", 42),
+            ("D", "d", 42),
+            ("SPACE", "space", 86),
+        ]
+        gap = 8
+        total_width = sum(item[2] for item in specs) + gap * (len(specs) - 1)
+        x = max(14, width // 2 - total_width // 2)
+        y = height - 44
+
+        overlay = frame.copy()
+        cv2.rectangle(overlay, (x - 12, y - 10), (x + total_width + 12, y + 38), TECH_DARK, -1)
+        cv2.addWeighted(overlay, 0.60, frame, 0.40, 0, frame)
+
+        for label, key, key_width in specs:
+            active = key in pressed_keys
+            fill = TECH_CYAN if active else (42, 48, 58)
+            border = TECH_WHITE if active else (110, 120, 130)
+            text = TECH_DARK if active else TECH_WHITE
+            cv2.rectangle(frame, (x, y), (x + key_width, y + 30), fill, -1, cv2.LINE_AA)
+            cv2.rectangle(frame, (x, y), (x + key_width, y + 30), border, 2, cv2.LINE_AA)
+            text_size, _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.45, 1)
+            tx = x + (key_width - text_size[0]) // 2
+            ty = y + 20
+            cv2.putText(frame, label, (tx, ty), cv2.FONT_HERSHEY_SIMPLEX, 0.45, text, 1, cv2.LINE_AA)
+            x += key_width + gap
