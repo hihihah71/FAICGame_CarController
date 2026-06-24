@@ -1,7 +1,8 @@
 opencv-python
-mediapipe
-numpy
+mediapipe==0.10.14
+numpy<2
 pyautogui
 mouse
 cvzone
-
+customtkinter
+pillow

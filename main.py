@@ -1,8 +1,5 @@
-import CarGameController as CarGame
-import pointerGameController as Pointer
-import leftHolderMouseButton as Spliter
+from ui.app import run_app
 
-CarGame.game()
-Spliter.game() 
-Pointer.game() 
-    
+
+if __name__ == "__main__":
+    run_app()

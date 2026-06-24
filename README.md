@@ -1,168 +1,205 @@
-# FAIC Game HomeComing
+# FAIC Game Controller
 
-Project nay la bo dieu khien game dua xe bang cu chi tay qua webcam. Ung dung se nhan dien hai tay, xem hai tay nhu dang cam vo lang ao, sau do gia lap cac phim `W`, `A`, `S`, `D`, `Space` de dieu khien game dang mo tren may.
+FAIC Game Controller la desktop app dung webcam de dieu khien game dua xe bang cu chi tay. App khong phai game doc lap; no nhan dien hai tay qua camera, tinh goc nhu vo lang ao, roi gia lap phim `W/A/S/D/Space` vao Windows de dieu khien game ben ngoai nhu Asphalt 8.
 
-Project phu hop de demo AI/computer vision trong TechFest/FAIC. No khong phai la game doc lap, vi vay ban can mo mot game dua xe rieng, vi du Asphalt 8.
+App duoc thiet ke cho demo TechFest: co giao dien desktop, camera preview, HUD tren frame camera, nut Start/Pause/Stop/Emergency Stop va man hinh Settings.
 
-## Tinh nang
+## Project nay lam gi?
 
-- Nhan dien hai tay bang webcam.
-- Tinh goc nghieng giua hai tay de re trai/phai.
-- Gia lap phim dieu khien xe tren Windows.
-- Ho tro vung BOOST va DRIFT bang vi tri hai tay.
-- Co cac module phu de dieu khien chuot bang cu chi tay.
+- Bien hai tay thanh vo lang ao.
+- Gui phim dieu khien vao game dua xe dang focus.
+- Hien thi camera preview truc tiep trong app.
+- Hien thi action hien tai, goc lai, phim dang bam, FPS va so tay detect duoc.
+- Cho phep chinh config co ban trong UI.
 
-## Yeu cau
+## Tinh nang chinh
+
+- Desktop UI bang CustomTkinter.
+- Racing Controller co camera preview va panel trang thai.
+- Input Manager co cache trang thai phim, khong spam press/release moi frame.
+- Camera worker chay thread rieng, khong block UI.
+- Config luu trong `config.json`.
+- HUD TechFest neon tren frame camera.
+- Emergency Stop de release tat ca phim ngay lap tuc.
+
+## Demo flow
+
+1. Mo game dua xe, vi du Asphalt 8.
+2. Chay `start.bat` hoac `python main.py`.
+3. Trong app, chon `Racing Controller`.
+4. Bam `Start`.
+5. Dua hai tay len truoc camera.
+6. Click lai vao cua so game neu game chua nhan phim.
+7. Dung `Pause`, `Stop` hoac `Emergency Stop` khi can.
+
+## Cau truc thu muc
+
+```text
+FAICGame_HomeComing/
+|-- main.py
+|-- config.json
+|-- requirements.txt
+|-- setup.bat
+|-- run.bat
+|-- start.bat
+|-- core/
+|   |-- config_manager.py
+|   |-- hand_tracker.py
+|   |-- racing_logic.py
+|   |-- input_manager.py
+|   |-- hud_renderer.py
+|   `-- camera_worker.py
+|-- ui/
+|   |-- app.py
+|   |-- home_frame.py
+|   |-- racing_frame.py
+|   `-- settings_frame.py
+|-- legacy/
+|   |-- README.md
+|   |-- pointerGameController.py
+|   |-- leftHolderMouseButton.py
+|   `-- SteeringWheelDisplay.py
+|-- CarGameController.py
+|-- keyinput.py
+`-- skills-lock.json
+```
+
+## Yeu cau he thong
 
 - Windows.
 - Webcam.
-- Python 3.10 hoac 3.11 khuyen dung.
-- Game dua xe co ho tro ban phim, vi du Asphalt 8.
+- Python 3.10 khuyen dung.
+- Game dua xe co ho tro ban phim.
 
-Luu y: Python 3.13 co the gap loi voi MediaPipe API cu. Neu gap loi `mediapipe` khong co `solutions`, hay dung Python 3.10.
+Khuyen nghi dung Python 3.10 vi MediaPipe co the loi voi Python qua moi.
 
-## Cai dat
+## Cai dat nhanh
 
-Mo PowerShell tai thu muc project:
+Double click:
+
+```text
+start.bat
+```
+
+Neu chua co `.venv`, `start.bat` se goi `setup.bat` de tao moi truong va cai dependencies.
+
+## Chay nhanh
+
+Neu da setup:
+
+```text
+run.bat
+```
+
+Hoac:
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+python main.py
+```
+
+## Chay thu cong
 
 ```powershell
 py -3.10 -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
 pip install -r requirements.txt
+python main.py
 ```
 
-Neu PowerShell chan file activate voi loi `execution of scripts is disabled`, chay:
+Neu PowerShell chan activate script:
 
 ```powershell
 Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
 ```
 
-Sau do activate lai:
+## Cach dung Racing Controller
 
-```powershell
-.\.venv\Scripts\Activate.ps1
-```
+- `Start`: mo camera, detect tay, render HUD va gui phim vao Windows.
+- `Pause / Resume`: tam dung hoac tiep tuc gui phim. Khi pause, app release tat ca phim dang giu.
+- `Stop`: dung camera worker, release tat ca phim va xoa preview.
+- `Emergency Stop`: release ngay tat ca phim `W/A/S/D/Space`.
+- `Back to Home`: quay ve Home, worker se duoc cleanup.
 
-Kiem tra dung moi truong:
+Khi dong app, app cung release tat ca phim va giai phong camera.
 
-```powershell
-python --version
-where python
-```
+## Gesture
 
-Duong dan Python nen nam trong thu muc `.venv` cua project.
-
-## Cach chay
-
-1. Mo game dua xe truoc.
-2. Dam bao cua so game dang focus va nhan phim `W/A/S/D/Space`.
-3. Chay controller:
-
-```powershell
-python main.py
-```
-
-4. Dua hai tay len truoc webcam.
-5. Bam `q` trong cua so camera de thoat.
-
-## Dieu khien
-
-| Cu chi | Phim gia lap | Tac dung |
+| Gesture | Phim | Y nghia |
 | --- | --- | --- |
-| Hai tay o giua man hinh | `W` | Chay toi |
-| Nghieng hai tay sang trai | `A` | Re trai |
-| Nghieng hai tay sang phai | `D` | Re phai |
-| Dua hai tay len cao | `Space` | Boost/Nitro |
-| Dua hai tay xuong thap | `S` | Phanh/Drift |
-| Dua hai tay xuong va nghieng trai/phai | `S` + `A/D` | Drift trai/phai |
-| Bo tay ra khoi camera | Tha phim | Dung gui input |
+| Hai tay nhu cam vo lang | `W` | Chay toi |
+| Nghieng tay sang trai | `A` | Re trai |
+| Nghieng tay sang phai | `D` | Re phai |
+| Nang hai tay len vung tren | `Space` | Boost/Nitro |
+| Ha hai tay xuong vung duoi | `S` | Drift/Brake |
+| Ha hai tay va nghieng trai/phai | `S` + `A/D` | Drift trai/phai |
+| Khong du 2 tay | Tha phim | Dung dieu khien |
 
-## Cau truc file
+## Settings va config
 
-- `main.py`: diem chay chinh cua project.
-- `CarGameController.py`: controller chinh cho game dua xe.
-- `SteeringWheelDisplay.py`: ve vo lang ao tren man hinh camera.
-- `keyinput.py`: gui phim vao Windows bang `SendInput`.
-- `pointerGameController.py`: demo dieu khien chuot bang ngon tay.
-- `leftHolderMouseButton.py`: demo giu/tha chuot trai bang cu chi.
-- `requirements.txt`: danh sach thu vien can cai.
+Settings luu vao `config.json`.
 
-## Luu y ve `main.py`
+Co the chinh:
 
-`main.py` dang chay theo thu tu:
+- Camera index.
+- Camera width/height.
+- Steering threshold.
+- Drift steering threshold.
+- Boost zone ratio.
+- Drift zone ratio.
+- Show landmarks.
+- Show FPS.
 
-```python
-CarGame.game()
-Spliter.game()
-Pointer.game()
-```
-
-`CarGame.game()` la vong lap camera lien tuc, nen hai module sau chi chay sau khi ban thoat cua so `FAIC Game` bang phim `q`.
-
-## Chinh kich thuoc camera
-
-Trong `CarGameController.py`, tim:
-
-```python
-FRAME_W = 640
-FRAME_H = 480
-```
-
-Tang giam hai gia tri nay de doi kich thuoc khung camera. Neu may bi lag khi nhan dien hai tay, nen de `640x480` hoac thap hon.
-
-Trong `pointerGameController.py` va `leftHolderMouseButton.py`, tim:
-
-```python
-cam_w, cam_h = 560, 480
-```
+Neu thay doi camera index/resolution khi camera dang chay, hay `Stop` roi `Start` lai de ap dung chac chan.
 
 ## Loi thuong gap
 
-### No Python at `...\Python311\python.exe`
+### Khong mo duoc camera
 
-Nguyen nhan: `.venv` duoc tao tu Python cu da bi xoa hoac copy tu may/user khac.
+- Kiem tra camera co dang bi app khac dung khong.
+- Thu doi Camera index trong Settings: `0`, `1`, `2`.
+- Rut/cam lai webcam neu dung webcam roi.
 
-Cach sua:
+### MediaPipe loi do Python version
+
+Dung Python 3.10 va cai lai:
 
 ```powershell
-deactivate
 Remove-Item -Recurse -Force .venv
 py -3.10 -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 ```
 
-### `AttributeError: module 'mediapipe' has no attribute 'solutions'`
+### Game khong nhan phim
 
-Nguyen nhan: ban dang dung MediaPipe/Python qua moi so voi code hien tai.
+- Click vao cua so game de focus.
+- Chay game o windowed/borderless mode neu can.
+- Dam bao game dung phim `W/A/S/D/Space`.
+- Mot so game can chay app voi quyen phu hop de nhan input.
 
-Cach sua khuyen dung:
+### App bi lag
 
-```powershell
-deactivate
-Remove-Item -Recurse -Force .venv
-py -3.10 -m venv .venv
-.\.venv\Scripts\Activate.ps1
-pip install -r requirements.txt
-```
+- Dung camera `640x480`.
+- Tat `Show landmarks`.
+- Dong app khac dang dung camera.
+- Dam bao phong du sang.
 
-Neu van gap loi, cai ban MediaPipe cu hon:
+### Camera bi nguoc
 
-```powershell
-pip install "mediapipe==0.10.14" "numpy<2"
-```
+Preview dang flip ngang de giong guong soi. Neu muon doi, sua dong `cv2.flip(frame, 1)` trong `core/camera_worker.py`.
 
-### Nhan dien du hai tay thi bi lag
+## Khuyen nghi demo
 
-- Giam kich thuoc camera ve `640x480`.
-- Dam bao chi co mot ung dung dang dung webcam.
-- Dong cac app nang khi demo.
-- Tang anh sang phong de MediaPipe nhan tay on dinh hon.
+- Dung Python 3.10.
+- Dung camera 640x480 de giam lag.
+- Chay game o windowed/borderless mode.
+- Dat camera ngang tam nguc hoac mat.
+- Nen co anh sang tot va nen sau lung don gian.
 
-## Ghi chu demo
+## Roadmap
 
-- Nen dat camera ngang tam nguc hoac ngang mat.
-- Nen dung phong co anh sang tot.
-- Nen tranh co nhieu nguoi/tay xuat hien trong khung hinh.
-- Neu game khong nhan phim, click lai vao cua so game de focus.
+- Calibration nang cao cho tung nguoi choi.
+- Nhieu HUD theme.
+- Dong goi thanh file `.exe`.

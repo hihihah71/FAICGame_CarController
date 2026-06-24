@@ -1,0 +1,25 @@
+{
+  "camera": {
+    "index": 0,
+    "width": 640,
+    "height": 480
+  },
+  "racing": {
+    "steer_threshold": 15,
+    "drift_steer_threshold": 5,
+    "boost_zone_ratio": 0.25,
+    "drift_zone_ratio": 0.7
+  },
+  "keys": {
+    "forward": "w",
+    "left": "a",
+    "right": "d",
+    "drift": "s",
+    "boost": "space"
+  },
+  "hud": {
+    "theme": "neon",
+    "show_fps": true,
+    "show_landmarks": true
+  }
+}
