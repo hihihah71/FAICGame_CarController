@@ -8,6 +8,7 @@ from PIL import Image, ImageTk
 
 from core.camera_worker import CameraStatus, CameraWorker
 from core.input_manager import InputManager
+from ui.gaming_camera_frame import GamingCameraFrame
 from ui.theme import BezelFrame, COLORS, button_style, font, mono
 
 
@@ -37,15 +38,9 @@ class RacingFrame(ctk.CTkFrame):
         self.preview_badge = ctk.CTkLabel(preview_header, text="IDLE", width=86, height=28, fg_color=COLORS["panel_alt"], text_color=COLORS["muted"], corner_radius=7, font=mono(12, "bold"))
         self.preview_badge.pack(side="right")
 
-        self.preview_label = ctk.CTkLabel(
-            preview_shell.inner,
-            text="Camera preview\nPress Start",
-            text_color=COLORS["muted"],
-            fg_color="#050914",
-            corner_radius=12,
-            font=font(18, "bold"),
-        )
-        self.preview_label.grid(row=1, column=0, sticky="nsew", padx=14, pady=(0, 14))
+        self.camera_frame = GamingCameraFrame(preview_shell.inner)
+        self.camera_frame.grid(row=1, column=0, sticky="nsew", padx=14, pady=(0, 14))
+        self.preview_label = self.camera_frame.preview_label
 
         panel = BezelFrame(self, width=360)
         panel.grid(row=0, column=1, sticky="ns", padx=(10, 18), pady=18)
@@ -96,7 +91,7 @@ class RacingFrame(ctk.CTkFrame):
 
     def stop(self) -> None:
         self.worker.stop()
-        self.preview_label.configure(image=None, text="Camera preview\nPress Start")
+        self.camera_frame.clear_preview("Camera preview\nPress Start")
         self.preview_badge.configure(text="IDLE", text_color=COLORS["muted"], fg_color=COLORS["panel_alt"])
         self.preview_image = None
 
@@ -136,7 +131,7 @@ class RacingFrame(ctk.CTkFrame):
         max_h = max(self.preview_label.winfo_height() - 20, 300)
         image.thumbnail((max_w, max_h), Image.LANCZOS)
         self.preview_image = ImageTk.PhotoImage(image)
-        self.preview_label.configure(image=self.preview_image, text="")
+        self.camera_frame.set_preview(self.preview_image, "")
 
     def _update_status_label(self) -> None:
         keys = " ".join(self._format_key(key) for key in sorted(self.status.pressed_keys)) or "-"
